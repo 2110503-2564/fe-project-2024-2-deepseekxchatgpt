@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import getUserProfile from '@/libs/getUserProfile';
 import getBooking from '@/libs/getBooking';
 import deleteBooking from '@/libs/deleteBooking';
+import EditBooking from './EditBooking';
 
 export default function BookingList() {
     const { data: session, status } = useSession();
@@ -14,6 +15,8 @@ export default function BookingList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [editingReservation, setEditingReservation] = useState<any>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         if (session?.user?.token) {
@@ -57,6 +60,22 @@ export default function BookingList() {
                 alert(err.message || "Failed to delete reservation");
             } finally {
                 setDeletingId(null);
+            }
+        }
+    };
+    
+    const handleEditReservation = (reservation: any) => {
+        setEditingReservation(reservation);
+        setIsEditModalOpen(true);
+    };
+
+    const handleReservationUpdated = async () => {
+        if (session?.user?.token) {
+            try {
+                const reservationsData = await getBooking(session.user.token);
+                setReservations(reservationsData.data || []);
+            } catch (err) {
+                console.error("Error updating reservations list:", err);
             }
         }
     };
@@ -145,6 +164,12 @@ export default function BookingList() {
                                                         {new Date(reservation.reservDate).toLocaleDateString()}
                                                     </span>
                                                     <button 
+                                                        onClick={() => handleEditReservation(reservation)}
+                                                        className="px-3 py-1 rounded-md bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white text-sm font-medium transition-all duration-300 mr-2"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button 
                                                         onClick={() => handleDeleteBooking(reservation._id)}
                                                         disabled={deletingId === reservation._id}
                                                         className={`px-3 py-1 rounded-md bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white text-sm font-medium transition-all duration-300 ${deletingId === reservation._id ? 'opacity-70 cursor-not-allowed' : ''}`}
@@ -180,6 +205,16 @@ export default function BookingList() {
                     </button>
                 </div>
             </div>
+            
+            {isEditModalOpen && editingReservation && session?.user?.token && (
+                <EditBooking
+                    open={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    reservation={editingReservation}
+                    token={session.user.token}
+                    onReservationUpdated={handleReservationUpdated}
+                />
+            )}
         </main>
     );
 }
