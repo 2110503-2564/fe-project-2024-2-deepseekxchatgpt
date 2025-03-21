@@ -25,7 +25,11 @@ export default function Booking() {
             try {
                 const coworkingsData = await getcoworkings();
                 if (coworkingsData && coworkingsData.data) {
-                    setCoWorkingSpaces(coworkingsData.data);
+                    const transformedData = coworkingsData.data.map(item => ({
+                        _id: item.id,
+                        ...item
+                    }));
+                    setCoWorkingSpaces(transformedData);
                 }
             } catch (error) {
                 console.error("Error fetching coworking spaces:", error);
