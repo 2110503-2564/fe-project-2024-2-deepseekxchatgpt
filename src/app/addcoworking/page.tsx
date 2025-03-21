@@ -18,7 +18,7 @@ export default function AddCoworking() {
     }, [session, status, router]);
   
     const [form, setForm] = useState<CoworkingItem>({
-      _id : ""
+      _id : "",
       name: "",
       address: "",
       district: "",
