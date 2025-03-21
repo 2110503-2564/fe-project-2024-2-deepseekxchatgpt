@@ -1,0 +1,16 @@
+import getcoworkings from '@/libs/getCoworkings'
+import CoworkingCatalog from '@/components/CoworkingCatalog'
+import {Suspense} from 'react'
+import {LinearProgress} from '@mui/material'
+export default function Coworking() {
+    const coworkings = getcoworkings()
+    return (
+        <main className = "text-center p-5">
+            <h1 className='text-xl font-medium'>Select Your Places</h1>
+            <Suspense fallback = {<p>Loading...<LinearProgress/></p>}>
+                <CoworkingCatalog coworkingJson = {coworkings}/>
+            </Suspense>
+        </main>
+
+    )
+}
