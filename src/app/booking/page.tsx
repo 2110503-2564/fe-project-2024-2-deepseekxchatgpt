@@ -1,69 +1,91 @@
 "use client"
 import DateReserve from "@/components/DateReserve"
-import { FormControl, MenuItem, Select, TextField } from "@mui/material"
-import {authOptions} from '@/app/api/auth/[...nextauth]/authOptions';
-import {getServerSession} from 'next-auth'
-import getUserProfile from '@/libs/getUserProfile'
+import { FormControl, MenuItem, Select } from "@mui/material"
 import { useState, useEffect } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
-import { addBooking } from "@/redux/features/bookSlice";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import getUserProfile from '@/libs/getUserProfile';
 import getcoworkings from '@/libs/getCoworkings';
+import createBooking from '@/libs/createBooking';
 
 export default function Booking() {
-    const [date,setDate] = useState<Dayjs|null>(null);
-    const dispatch = useDispatch<AppDispatch>();
-    const [nameLastname,setNameLastname]=useState<string>('');
-    const [tel,setTel] = useState<string>('');
-    const [coworking,setcoworking] = useState<string>('');
-    const [coWorkingSpaces, setCoWorkingSpaces] = useState<any[]>([]);
+    const { data: session, status } = useSession();
+    const router = useRouter();
+    const [date, setDate] = useState<Dayjs|null>(null);
+    const [coworkingId, setCoworkingId] = useState<string>('');
+    const [coworkingSpaces, setCoworkingSpaces] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userProfile, setUserProfile] = useState<any>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
 
     useEffect(() => {
-        const fetchCoworkings = async () => {
-            try {
-                const coworkingsData = await getcoworkings();
-                if (coworkingsData && coworkingsData.data) {
-                    setCoWorkingSpaces(coworkingsData.data);
-                }
-            } catch (error) {
-                console.error("Error fetching coworking spaces:", error);
-            } finally {
-                setLoading(false);
+      const fetchData = async () => {
+        if (session?.user?.token) {
+          try {
+            setLoading(true);
+            
+            const profileData = await getUserProfile(session.user.token);
+            setUserProfile(profileData.data);
+            
+            
+            const coworkingsData = await getcoworkings();
+            if (coworkingsData && coworkingsData.data) {
+                setCoworkingSpaces(coworkingsData.data);
             }
-        };
-        
-        fetchCoworkings();
-    }, []);
+          } catch (error) {
+            console.error("Error fetching data:", error);
+            setError("Failed to load required data");
+          } finally {
+            setLoading(false);
+          }
+        }
+      };
+      
+      if (session?.user?.token) {
+        fetchData();
+      }
+    }, [session]);
     
-    const makeBooking=() => {
-        if(date?.isValid() && nameLastname !== '' && tel !== '' && coworking !== '') {
-            const item :BookingItem = {
-                nameLastname : nameLastname,
-                tel : tel,
-                coWorking : coworking,
-                bookDate : dayjs(date).format("DD/MM/YYYY")
-            }
-            dispatch(addBooking(item))
-            window.alert("The booking was successfully")
-        }
-        else {
-            let txt = '';
-            if(!date?.isValid()) {
-                txt += 'Invalid date. \n';
-            }
-            if(nameLastname === '') {
-                txt += 'Name-Lastname is required \n';
-            }
-            if(tel === '') {
-                txt += 'Telephone number is required \n';
-            }
-            if(coworking === '') {
-                txt += 'coworking is required \n';
-            }
-            window.alert(txt);
-        }
+    const makeBooking = async () => {
+      if (!session?.user?.token) {
+        window.alert("You must be logged in to make a booking");
+        return;
+      }
+      
+      setError(null);
+      
+      if (!date?.isValid()) {
+        setError("Please select a valid date");
+        return;
+      }
+      
+      if (!coworkingId) {
+        setError("Please select a coworking space");
+        return;
+      }
+      
+      try {
+        setSubmitting(true);
+        const bookingDate = date.toISOString();
+        await createBooking(coworkingId, bookingDate, session.user.token);
+        window.alert("Booking was successful!");
+      } catch (err: any) {
+        setError(err.message || "Failed to create booking");
+      } finally {
+        setSubmitting(false);
+      }
+    };
+    
+    if (status === "loading" || loading) {
+      return (
+        <div className="flex flex-col bg-gradient-to-br from-blue-200 via-purple-300 to-pink-400 w-full min-h-screen overflow-hidden items-center justify-center">
+          <div className="w-16 h-16 border-4 border-t-transparent border-indigo-500 rounded-full animate-spin"></div>
+          <p className="text-white mt-4 text-lg">Loading...</p>
+        </div>
+      );
     }
     
     return (
@@ -72,123 +94,47 @@ export default function Booking() {
           <div className="mt-10 text-3xl font-extrabold mb-8 text-center text-indigo-900">
             New Reservation
           </div>
-          <div className="space-y-6">
-          <div className="text-xl text-indigo-900 ml-4 font-semibold">Name and Contacts</div>
-            <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-6 flex flex-col sm:flex-row sm:space-x-5 space-y-5 sm:space-y-0 shadow-md">
-                <TextField
-                variant="outlined"
-                name="Name-Lastname"
-                label="Name - Lastname"
-                placeholder="Enter your full name"
-                onChange={(e) => setNameLastname(e.target.value)}
-                className="flex-1"
-                InputProps={{
-                    className: "bg-gradient-to-r from-blue-50 to-indigo-50 shadow-sm"
-                }}
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                    borderRadius: '0.75rem',
-                    transition: 'all 0.3s ease',
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgb(129, 140, 248)',
-                        borderWidth: '2px',
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgb(99, 102, 241)',
-                        borderWidth: '2px',
-                        boxShadow: '0 0 0 3px rgba(99, 102, 241, 0.2)',
-                    },
-                    '&.Mui-focused': {
-                        outline: 'none',
-                    }
-                    },
-                    '& .MuiInputLabel-root': {
-                    color: 'rgb(79, 70, 229)',
-                    fontWeight: '500',
-                    '&.Mui-focused': {
-                        color: 'rgb(67, 56, 202)',
-                    }
-                    },
-                    '& .MuiOutlinedInput-input': {
-                    padding: '14px 16px',
-                    '&:focus': {
-                        outline: 'none',
-                        boxShadow: 'none'
-                    }
-                    },
-                    '& .Mui-focused': {
-                    outline: 'none'
-                    }
-                }}
-                />
-                <TextField
-                variant="outlined"
-                name="Contact-Number"
-                label="Contact Number"
-                placeholder="Enter your phone number"
-                onChange={(e) => setTel(e.target.value)}
-                className="flex-1"
-                InputProps={{
-                    className: "bg-gradient-to-r from-purple-50 to-pink-50 shadow-sm"
-                }}
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                    borderRadius: '0.75rem',
-                    transition: 'all 0.3s ease',
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgb(139, 92, 246)',
-                        borderWidth: '2px',
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgb(124, 58, 237)',
-                        borderWidth: '2px',
-                        boxShadow: '0 0 0 3px rgba(124, 58, 237, 0.2)',
-                    },
-                    '&.Mui-focused': {
-                        outline: 'none',
-                    }
-                    },
-                    '& .MuiInputLabel-root': {
-                    color: 'rgb(124, 58, 237)',
-                    fontWeight: '500',
-                    '&.Mui-focused': {
-                        color: 'rgb(109, 40, 217)',
-                    }
-                    },
-                    '& .MuiOutlinedInput-input': {
-                    padding: '14px 16px',
-                    '&:focus': {
-                        outline: 'none',
-                        boxShadow: 'none'
-                    }
-                    },
-                    '& .Mui-focused': {
-                    outline: 'none'
-                    }
-                }}
-                />
+          
+          {userProfile && (
+            <div className="mb-6">
+              <div className="text-xl text-indigo-900 ml-4 font-semibold">Your Information</div>
+              <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-6 mt-2 shadow-md">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700">Name:</span>
+                    <span className="text-indigo-800">{userProfile.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700">Email:</span>
+                    <span className="text-indigo-800">{userProfile.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700">Tel:</span>
+                    <span className="text-indigo-800">{userProfile.tel}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="text-xl text-indigo-900 ml-4 font-semibold">Co-Working Space(s)</div>
+          )}
+          
+          <div className="space-y-6">
+            <div className="text-xl text-indigo-900 ml-4 font-semibold">Co-Working Space</div>
             <div className="px-4 overflow-x-hidden">
               <Select
                 variant="outlined"
                 name="coworking"
                 id="coworking"
-                value={coworking}
-                onChange={(e) => setcoworking(e.target.value)}
+                value={coworkingId}
+                onChange={(e) => setCoworkingId(e.target.value)}
                 className="h-full w-full bg-white border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 overflow-hidden"
                 displayEmpty
               >
-                <MenuItem value="" disabled>Please Select a Co-Working space</MenuItem>
-                {loading ? (
-                  <MenuItem disabled>Loading spaces...</MenuItem>
-                ) : coWorkingSpaces.length > 0 ? (
-                  coWorkingSpaces.map((space) => (
-                    <MenuItem key={space.id} value={space.name}>{space.name}</MenuItem>
-                  ))
-                ) : (
-                  <MenuItem disabled>No spaces available</MenuItem>
-                )}
+                <MenuItem value="" disabled>Please select a Co-Working Space</MenuItem>
+                {coworkingSpaces.map((space) => (
+                  <MenuItem key={space.id} value={space.id}>
+                    {space.name}
+                  </MenuItem>
+                ))}
               </Select>
             </div>
             <div className="text-xl text-indigo-900 ml-4 font-semibold">Booking Date</div>
@@ -196,14 +142,23 @@ export default function Booking() {
               <DateReserve onDateChange={(value: Dayjs) => setDate(value)} />
             </div>
           </div>
+          
+          {error && (
+            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
+          
           <button
             onClick={makeBooking}
-            className="mt-6 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-5 py-3 text-white text-lg font-semibold shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
+            disabled={submitting}
+            className={`mt-6 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-5 py-3 text-white text-lg font-semibold shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             name="Book coworking"
           >
-            Book Your Co-Working Space
+            {submitting ? 'Processing...' : 'Book Your Co-Working Space'}
           </button>
         </FormControl>
+        
         <button
           onClick={() => window.location.href = '/'}
           className="mt-6 w-full max-w-lg rounded-xl border border-indigo-300 bg-white hover:bg-indigo-50 hover:border-indigo-500 px-5 py-3 text-indigo-600 hover:text-indigo-700 text-lg font-semibold shadow-md transition-all duration-300 hover:shadow-lg"
