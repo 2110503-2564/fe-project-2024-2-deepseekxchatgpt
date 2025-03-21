@@ -4,11 +4,12 @@ import { FormControl, MenuItem, Select, TextField } from "@mui/material"
 import {authOptions} from '@/app/api/auth/[...nextauth]/authOptions';
 import {getServerSession} from 'next-auth'
 import getUserProfile from '@/libs/getUserProfile'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { addBooking } from "@/redux/features/bookSlice";
+import getcoworkings from '@/libs/getCoworkings';
 
 export default function Booking() {
     const [date,setDate] = useState<Dayjs|null>(null);
@@ -16,6 +17,25 @@ export default function Booking() {
     const [nameLastname,setNameLastname]=useState<string>('');
     const [tel,setTel] = useState<string>('');
     const [coworking,setcoworking] = useState<string>('');
+    const [coWorkingSpaces, setCoWorkingSpaces] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCoworkings = async () => {
+            try {
+                const coworkingsData = await getcoworkings();
+                if (coworkingsData && coworkingsData.data) {
+                    setCoWorkingSpaces(coworkingsData.data);
+                }
+            } catch (error) {
+                console.error("Error fetching coworking spaces:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchCoworkings();
+    }, []);
     
     const makeBooking=() => {
         if(date?.isValid() && nameLastname !== '' && tel !== '' && coworking !== '') {
@@ -148,7 +168,7 @@ export default function Booking() {
                 }}
                 />
             </div>
-            <div className="text-xl text-indigo-900 ml-4 font-semibold">coworking</div>
+            <div className="text-xl text-indigo-900 ml-4 font-semibold">Co-Working Space(s)</div>
             <div className="px-4 overflow-x-hidden">
               <Select
                 variant="outlined"
@@ -157,10 +177,18 @@ export default function Booking() {
                 value={coworking}
                 onChange={(e) => setcoworking(e.target.value)}
                 className="h-full w-full bg-white border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 overflow-hidden"
+                displayEmpty
               >
-                <MenuItem value="Bloom">The Bloom Pavilion</MenuItem>
-                <MenuItem value="Spark">Spark Space</MenuItem>
-                <MenuItem value="GrandTable">The Grand Table</MenuItem>
+                <MenuItem value="" disabled>Please Select a Co-Working space</MenuItem>
+                {loading ? (
+                  <MenuItem disabled>Loading spaces...</MenuItem>
+                ) : coWorkingSpaces.length > 0 ? (
+                  coWorkingSpaces.map((space) => (
+                    <MenuItem key={space.id} value={space.name}>{space.name}</MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>No spaces available</MenuItem>
+                )}
               </Select>
             </div>
             <div className="text-xl text-indigo-900 ml-4 font-semibold">Booking Date</div>
@@ -173,7 +201,7 @@ export default function Booking() {
             className="mt-6 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-5 py-3 text-white text-lg font-semibold shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
             name="Book coworking"
           >
-            Book coworking
+            Book Your Co-Working Space
           </button>
         </FormControl>
         <button

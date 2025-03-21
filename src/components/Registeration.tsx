@@ -21,7 +21,7 @@ export default function Register() {
     const password = formData.get("password") as string;
 
     try {
-      await userRegister(name, email, tel,password);
+      await userRegister(name, email, tel, password);
       window.alert("Registration successful! Please sign in.");
       router.push("/api/auth/signin");
     } catch (err: any) {
@@ -30,8 +30,22 @@ export default function Register() {
       setLoading(false);
     }
   }
+
+  if (loading) {
     return (
-        <div className="flex flex-col bg-gradient-to-br from-blue-200 via-purple-300 to-pink-400 w-full min-h-screen overflow-hidden items-center p-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 via-purple-300 to-pink-400">
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-t-transparent border-indigo-500 rounded-full animate-spin"></div>
+          <h2 className="mt-4 text-xl font-semibold text-indigo-900">
+            Creating User
+          </h2>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col bg-gradient-to-br from-blue-200 via-purple-300 to-pink-400 w-full min-h-screen overflow-hidden items-center p-8">
       <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-2xl p-8 sm:p-10 w-full max-w-lg border border-gray-200 mt-10">
         <h1 className="mt-10 text-3xl font-extrabold mb-8 text-center text-indigo-900">
           Register
@@ -65,7 +79,7 @@ export default function Register() {
           </div>
           <div>
             <label htmlFor="tel" className="block text-sm font-medium text-gray-700">
-              Email
+              Telephone
             </label>
             <input 
               type="tel" 
@@ -78,7 +92,7 @@ export default function Register() {
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
+              Password (At least 6 characters)
             </label>
             <input 
               type="password" 
@@ -90,6 +104,11 @@ export default function Register() {
             />
           </div>
         </div>
+        {error && (
+          <div className="mt-4 text-red-600 font-medium">
+            {error}
+          </div>
+        )}
         <button 
           type="submit"
           className="mt-6 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-5 py-3 text-white text-lg font-semibold shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
@@ -97,7 +116,7 @@ export default function Register() {
           Register
         </button>
       </form>
-      <div className = 'w-full max-w-lg'>
+      <div className="w-full max-w-lg">
         <button  
           type="button"
           onClick={() => window.location.href = '/'}
@@ -105,8 +124,7 @@ export default function Register() {
         >
           Back to Main Page
         </button>
-
       </div>
     </div>
-    )
+  )
 }
