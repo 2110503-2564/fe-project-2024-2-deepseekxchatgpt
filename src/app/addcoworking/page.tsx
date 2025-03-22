@@ -45,6 +45,7 @@ export default function AddCoworking() {
   
       try {
         if (session?.user.token) {
+          console.log(form);
           await createCoworkingSpace(form, session.user.token);
         } else {
           throw new Error("User token is missing");

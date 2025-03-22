@@ -3,7 +3,6 @@ import CoworkingCatalog from '@/components/CoworkingCatalog';
 import { Suspense } from 'react';
 
 export default function Coworking() {
-  const coworkings = getcoworkings();
 
   return (
     <main className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 min-h-screen">
@@ -21,7 +20,7 @@ export default function Coworking() {
             <p className="text-xl text-white mt-6">Discovering amazing spaces...</p>
           </div>
         }>
-          <CoworkingCatalog coworkingJson={coworkings} />
+          <CoworkingCatalog/>
         </Suspense>
       </div>
     </main>
