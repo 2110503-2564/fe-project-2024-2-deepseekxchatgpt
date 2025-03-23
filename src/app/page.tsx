@@ -47,68 +47,6 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Featured Spaces */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-indigo-900 mb-12">Our Popular Spaces</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="relative h-64">
-                <Image 
-                  src="/img/bloom.jpg" 
-                  alt="The Bloom Pavilion" 
-                  fill={true}
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6 bg-white">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">The Bloom Pavilion</h3>
-                <p className="text-gray-600 mb-4">A bright, open space perfect for creative teams and collaborative projects.</p>
-                <Link href="/venue/001" className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300">
-                  View Details
-                </Link>
-              </div>
-            </div>
-            
-            <div className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="relative h-64">
-                <Image 
-                  src="/img/sparkspace.jpg" 
-                  alt="Spark Space" 
-                  fill={true}
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6 bg-white">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Spark Space</h3>
-                <p className="text-gray-600 mb-4">Modern and tech-equipped space ideal for startups and tech companies.</p>
-                <Link href="/venue/002" className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300">
-                  View Details
-                </Link>
-              </div>
-            </div>
-            
-            <div className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="relative h-64">
-                <Image 
-                  src="/img/grandtable.jpg" 
-                  alt="The Grand Table" 
-                  fill={true}
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6 bg-white">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">The Grand Table</h3>
-                <p className="text-gray-600 mb-4">Elegant meeting space for important presentations and client meetings.</p>
-                <Link href="/venue/003" className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300">
-                  View Details
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
       {/* CTA Section */}
       <section className="py-16 bg-indigo-900 text-white">
         <div className="container mx-auto px-4 text-center">
