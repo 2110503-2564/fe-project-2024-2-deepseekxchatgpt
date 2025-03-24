@@ -60,7 +60,7 @@ export default function Register() {
               name="name" 
               id="name" 
               placeholder="Enter your name" 
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 text-black"
               required
             />
           </div>
@@ -73,7 +73,7 @@ export default function Register() {
               name="email" 
               id="email" 
               placeholder="Enter your email"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 text-black"
               required
             />
           </div>
@@ -86,7 +86,7 @@ export default function Register() {
               name="tel" 
               id="tel" 
               placeholder="Enter your Telephone number"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 text-black"
               required
             />
           </div>
@@ -99,7 +99,7 @@ export default function Register() {
               name="password" 
               id="password" 
               placeholder="Enter your password"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 text-black"
               required
             />
           </div>
