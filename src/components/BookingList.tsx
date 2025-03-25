@@ -146,11 +146,17 @@ export default function BookingList() {
 
                     {/* Reservations List */}
                     <div className="bg-white shadow-xl rounded-2xl p-8">
-                        <h1 className="text-3xl font-bold text-indigo-900 mb-6">Your Reservations</h1>
+                        {
+                            (session?.user.role === 'admin')? (
+                                <h1 className="text-3xl font-bold text-indigo-900 mb-6">All Reservations</h1>
+                             ) : (
+                                <h1 className="text-3xl font-bold text-indigo-900 mb-6">Your Reservations</h1>
+                             )
+                        }
                         {reservations.length > 0 ? (
                             <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 shadow-md">
                                 <ul className="divide-y divide-indigo-200">
-                                    {reservations.map((reservation) => (
+                                {reservations.map((reservation) => (
                                         <li key={reservation._id} className="py-4">
                                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                                                 <div>
@@ -158,6 +164,11 @@ export default function BookingList() {
                                                     <p className="text-sm text-gray-600">
                                                         {reservation.coWorking.province}
                                                     </p>
+                                                    {session?.user.role === 'admin' && reservation.user && (
+                                                        <p className="text-xs font-medium text-indigo-600 mt-1">
+                                                            Reserved by: {reservation.user.name || reservation.user.email}
+                                                        </p>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center mt-2 md:mt-0">
                                                     <span className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium mr-3">

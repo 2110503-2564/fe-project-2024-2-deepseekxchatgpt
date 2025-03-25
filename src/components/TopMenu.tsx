@@ -16,7 +16,12 @@ export default async function TopMenu() {
             }
             <TopMenuItem title='View Co-Working Space(s)' pageRef='/coworking'/>
             <TopMenuItem title='Book Co-Working Space' pageRef='/booking'/>
-            <TopMenuItem title='My Booking' pageRef='/mybooking'/>
+            {
+                (session?.user.role === 'admin')?
+                <TopMenuItem title='Manage Booking' pageRef='/mybooking'/>
+                :<TopMenuItem title ='My Booking' pageRef='mybooking'/>
+                
+            }
             {
                 session ? (
                     <TopMenuItem title={`Sign out of ${session.user?.username}`} pageRef='/api/auth/signout' />
