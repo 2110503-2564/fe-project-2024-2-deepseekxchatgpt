@@ -28,6 +28,35 @@ export default function BanUserPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (!session?.user?.token) {
+        throw new Error("No token found in session");
+      }
+
+      const usersResponse = await getUsers(session.user.token);
+      const bannedUsersResponse = await getBannedUsers(session.user.token);
+
+      setUsers(Array.isArray(usersResponse.data) ? usersResponse.data : []);
+
+      // Extract banned user IDs properly
+      setBannedUserIds(
+        Array.isArray(bannedUsersResponse.data)
+          ? bannedUsersResponse.data.map(
+              (entry: { user: { _id: any } }) => entry.user._id
+            )
+          : []
+      );
+    } catch (err: any) {
+      console.error("Error fetching data:", err);
+      setError(err.message || "Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (status === "loading") return;
 
@@ -35,31 +64,6 @@ export default function BanUserPage() {
       router.push("/");
       return;
     }
-
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        if (!session?.user?.token) {
-          throw new Error("No token found in session");
-        }
-
-        const usersResponse = await getUsers(session.user.token);
-        const bannedUsersResponse = await getBannedUsers(session.user.token);
-        console.log("asdasdasdasd");
-        console.log(usersResponse);
-        // console.log(bannedUsersResponse);
-        setUsers(Array.isArray(usersResponse.data) ? usersResponse.data : []);
-        setBannedUserIds(
-          Array.isArray(bannedUsersResponse) ? bannedUsersResponse : []
-        );
-      } catch (err: any) {
-        console.error("Error fetching data:", err);
-        setError(err.message || "Failed to fetch data");
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchData();
   }, [session, status, router]);
@@ -73,8 +77,7 @@ export default function BanUserPage() {
       }
 
       await banUser(userId, session.user.token);
-      // Update the banned user list after successful ban
-      setBannedUserIds((prevBannedUserIds) => [...prevBannedUserIds, userId]);
+      await fetchData(); // Re-fetch user list to update UI
     } catch (err: any) {
       console.error("Error banning user:", err);
       setError(err.message || "Failed to ban user");
@@ -91,12 +94,9 @@ export default function BanUserPage() {
       if (!session?.user?.token) {
         throw new Error("No token found in session");
       }
-      await unbanUser(userId, session.user.token);
 
-      // Update the banned user list after successful unban
-      setBannedUserIds((prevBannedUserIds) =>
-        prevBannedUserIds.filter((id) => id !== userId)
-      );
+      await unbanUser(userId, session.user.token);
+      await fetchData(); // Re-fetch user list to update UI
     } catch (err: any) {
       console.error("Error unbanning user:", err);
       setError(err.message || "Failed to unban user");

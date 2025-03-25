@@ -27,7 +27,7 @@ export async function banUser(userId: string, token: string) {
 
 export async function unbanUser(userId: string, token: string) {
   const response = await fetch(
-    `https://deepseekxchatgpt-backend.vercel.app/api/v1/banning/${userId}`,
+    `https://deepseekxchatgpt-backend.vercel.app/api/v1/banned/${userId}`,
     {
       // Replace with your API endpoint to unban user
       method: "DELETE",
