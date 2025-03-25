@@ -38,6 +38,9 @@ export const authOptions:AuthOptions = {
         async session({session,token,user}) {
             session.user = token as any
             return session;
-        }
+        },
+        async redirect({ url, baseUrl }) {
+          return baseUrl; // Always redirect to home page (`/`)
+        },
     }
 }
