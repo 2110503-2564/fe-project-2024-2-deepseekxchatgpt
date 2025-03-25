@@ -46,9 +46,13 @@ export default function BanUserPage() {
 
         const usersResponse = await getUsers(session.user.token);
         const bannedUsersResponse = await getBannedUsers(session.user.token);
-
-        setUsers(usersResponse);
-        setBannedUserIds(bannedUsersResponse);
+        console.log("asdasdasdasd");
+        console.log(usersResponse);
+        // console.log(bannedUsersResponse);
+        setUsers(Array.isArray(usersResponse.data) ? usersResponse.data : []);
+        setBannedUserIds(
+          Array.isArray(bannedUsersResponse) ? bannedUsersResponse : []
+        );
       } catch (err: any) {
         console.error("Error fetching data:", err);
         setError(err.message || "Failed to fetch data");
@@ -102,16 +106,18 @@ export default function BanUserPage() {
     }
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = Array.isArray(users)
+    ? users.filter(
+        (user) =>
+          user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        Loading users...
+      <div className="flex justify-center items-center min-h-screen bg-purple-50">
+        <div className="text-purple-700 font-semibold">Loading users...</div>
       </div>
     );
   }
@@ -121,44 +127,66 @@ export default function BanUserPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Manage Users</h1>
+    <div className="container mx-auto p-4 bg-purple-50 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4 text-purple-800 text-center">
+        Manage Users
+      </h1>
 
       <div className="mb-4">
         <input
           type="text"
           placeholder="Search by name or email"
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow appearance-none border border-purple-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-purple-500"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200">
+      <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="min-w-full bg-white border border-purple-200">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="py-2 px-4 border-b">Name</th>
-              <th className="py-2 px-4 border-b">Email</th>
-              <th className="py-2 px-4 border-b">Role</th>
-              <th className="py-2 px-4 border-b">Status</th>
-              <th className="py-2 px-4 border-b">Actions</th>
+            <tr className="bg-purple-100">
+              <th className="py-2 px-4 border-b border-purple-200 text-purple-800 text-center">
+                Name
+              </th>
+              <th className="py-2 px-4 border-b border-purple-200 text-purple-800 text-center">
+                Email
+              </th>
+              <th className="py-2 px-4 border-b border-purple-200 text-purple-800 text-center">
+                Role
+              </th>
+              <th className="py-2 px-4 border-b border-purple-200 text-purple-800 text-center">
+                Status
+              </th>
+              <th className="py-2 px-4 border-b border-purple-200 text-purple-800 text-center">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {filteredUsers.map((user) => (
-              <tr key={user._id} className="hover:bg-gray-50">
-                <td className="py-2 px-4 border-b">{user.name}</td>
-                <td className="py-2 px-4 border-b">{user.email}</td>
-                <td className="py-2 px-4 border-b">{user.role}</td>
-                <td className="py-2 px-4 border-b">
-                  {bannedUserIds.includes(user._id) ? "Banned" : "Active"}
+              <tr key={user._id} className="hover:bg-purple-50">
+                <td className="py-2 px-4 border-b border-purple-200 text-black text-center">
+                  {user.name}
                 </td>
-                <td className="py-2 px-4 border-b">
+                <td className="py-2 px-4 border-b border-purple-200 text-black text-center">
+                  {user.email}
+                </td>
+                <td className="py-2 px-4 border-b border-purple-200 text-black text-center">
+                  {user.role}
+                </td>
+                <td className="py-2 px-4 border-b border-purple-200 text-center">
+                  {bannedUserIds.includes(user._id) ? (
+                    <span className="text-red-600 font-medium">Banned</span>
+                  ) : (
+                    <span className="text-green-600 font-medium">Active</span>
+                  )}
+                </td>
+                <td className="py-2 px-4 border-b border-purple-200 text-center">
                   {!bannedUserIds.includes(user._id) ? (
                     <button
                       disabled={submitting}
-                      className={`bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ${
+                      className={`bg-purple-600 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded ${
                         submitting ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                       onClick={() => handleBanUser(user._id)}
@@ -168,7 +196,7 @@ export default function BanUserPage() {
                   ) : (
                     <button
                       disabled={submitting}
-                      className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ${
+                      className={`bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded ${
                         submitting ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                       onClick={() => handleUnbanUser(user._id)}

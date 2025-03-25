@@ -24,6 +24,8 @@ export default async function getBannedUsers(token: string): Promise<string[]> {
 
   const data = await response.json();
   // Extract user IDs from the banned users list
-  const bannedIds = data.map((bannedUser: { user: string }) => bannedUser.user);
+  const bannedIds = data.data.map(
+    (bannedUser: { user: string }) => bannedUser.user
+  );
   return bannedIds;
 }
